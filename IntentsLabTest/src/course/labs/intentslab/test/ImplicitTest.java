@@ -54,7 +54,7 @@ public class ImplicitTest extends
 				solo.waitForActivity("ChooserActivity"));
 
 		// Click on MyBrowser
-		solo.clickInList(2, 0);
+		solo.clickInList(3, 0);
 
 	}
 }
