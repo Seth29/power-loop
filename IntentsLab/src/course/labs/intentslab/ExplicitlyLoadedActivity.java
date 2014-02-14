@@ -3,6 +3,7 @@ package course.labs.intentslab;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -47,12 +48,17 @@ public class ExplicitlyLoadedActivity extends Activity {
 		Log.i(TAG,"Entered enterClicked()");
 		
 		// TODO - Save user provided input from the EditText field
+		Editable text = mEditText.getText();
 
 		// TODO - Create a new intent and save the input from the EditText field as an extra
+		Intent data = new Intent(ExplicitlyLoadedActivity.this, ActivityLoaderActivity.class);
+		data.putExtra(Intent.EXTRA_TEXT, text);
 		
 		// TODO - Set Activity's result with result code RESULT_OK
+		setResult(RESULT_OK, data);
 		
 		// TODO - Finish the Activity
+		finish();
 
 	}
 }
