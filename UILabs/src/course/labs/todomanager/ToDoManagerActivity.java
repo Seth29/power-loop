@@ -50,10 +50,10 @@ public class ToDoManagerActivity extends ListActivity {
 		getListView().setFooterDividersEnabled(true);
 
 		//TODO - Inflate footerView for footer_view.xml file
-
-		TextView footerView = null;
+		TextView footerView = (TextView) getLayoutInflater().inflate(R.layout.footer_view, null);
 
 		//TODO - Add footerView to ListView
+		getListView().addFooterView(footerView);
 
 		footerView.setOnClickListener(new OnClickListener() {
 			@Override
@@ -62,12 +62,13 @@ public class ToDoManagerActivity extends ListActivity {
 				log("Entered footerView.OnClickListener.onClick()");
 
 				//TODO - Attach Listener to FooterView. Implement onClick().
-
+				Intent intent = new Intent(ToDoManagerActivity.this, AddToDoActivity.class);
+				startActivityForResult(intent, ADD_TODO_ITEM_REQUEST);
 			}
 		});
 
-		//TODO - Attach the adapter to this ListActivity's ListView
-
+		//TODO - Attach the adapter to this ListActivity's ListView No se como hacer esto
+		setListAdapter(mAdapter);
 	}
 
 	@Override
@@ -79,6 +80,12 @@ public class ToDoManagerActivity extends ListActivity {
 		// If user submitted a new ToDoItem
 		// Create a new ToDoItem from the data Intent
 		// and then add it to the adapter
+		if (resultCode==RESULT_OK){
+			if(requestCode==ADD_TODO_ITEM_REQUEST){
+				ToDoItem newItem = new ToDoItem(data);
+				mAdapter.add(newItem);
+			}
+		}
 
 	}
 
