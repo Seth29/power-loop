@@ -17,8 +17,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 public class MainActivity extends Activity implements SelectionListener {
 
@@ -26,7 +28,7 @@ public class MainActivity extends Activity implements SelectionListener {
 	public static final String[] FRIENDS = { "taylorswift13", "msrebeccablack",
 			"ladygaga" };
 	public static final String DATA_REFRESHED_ACTION = "course.labs.notificationslab.DATA_REFRESHED";
-	
+		
 	private static final int NUM_FRIENDS = 3;
 	private static final String URL_LGAGA = "https://d396qusza40orc.cloudfront.net/android%2FLabs%2FUserNotifications%2Fladygaga.txt";
 	private static final String URL_RBLACK = "https://d396qusza40orc.cloudfront.net/android%2FLabs%2FUserNotifications%2Frebeccablack.txt";
@@ -84,14 +86,16 @@ public class MainActivity extends Activity implements SelectionListener {
 			// Show a Toast Notification to inform user that 
 			// the app is "Downloading Tweets from Network"
 			log ("Issuing Toast Message");
-
+			Toast toast = Toast.makeText(getApplicationContext(), "Downloading Tweets from Network", Toast.LENGTH_SHORT);
+			toast.show();
 			
 			
 			// TODO:
 			// Start new AsyncTask to download Tweets from network
-
-
-
+			//DownloaderTask task = new DownloaderTask(this);
+			//task.doInBackground(FRIENDS);
+			new DownloaderTask(this).execute(URL_TSWIFT,URL_RBLACK,URL_LGAGA);
+			
 			
 			// Set up a BroadcastReceiver to receive an Intent when download
 			// finishes. 
@@ -105,7 +109,9 @@ public class MainActivity extends Activity implements SelectionListener {
 					// Check to make sure this is an ordered broadcast
 					// Let sender know that the Intent was received
 					// by setting result code to RESULT_OK
-
+					if (isOrderedBroadcast()){
+						setResultCode(RESULT_OK);
+					}
 
 				}
 			};
@@ -179,7 +185,8 @@ public class MainActivity extends Activity implements SelectionListener {
 		// TODO:
 		// Register the BroadcastReceiver to receive a 
 		// DATA_REFRESHED_ACTION broadcast
-
+		IntentFilter intentFilter = new IntentFilter(DATA_REFRESHED_ACTION);
+		registerReceiver(mRefreshReceiver, intentFilter);
 
 		
 	}
@@ -189,7 +196,7 @@ public class MainActivity extends Activity implements SelectionListener {
 
 		// TODO:
 		// Unregister the BroadcastReceiver
-
+		unregisterReceiver(mRefreshReceiver);
 
 		
 		
