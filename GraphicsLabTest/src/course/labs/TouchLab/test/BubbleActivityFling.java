@@ -42,6 +42,6 @@ public class BubbleActivityFling extends ActivityInstrumentationTestCase2<Bubble
 		// Fling
 		solo.drag(100, 500, 100, 500, 3);
 		
-		solo.sleep(2000);
+		solo.sleep(4000);
 	}
 }
