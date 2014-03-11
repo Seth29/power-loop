@@ -58,22 +58,31 @@ public class PlaceViewActivity extends ListActivity implements LocationListener 
         // TODO - When the footerView's onClick() method is called, it must issue the
         // following log call
         // log("Entered footerView.OnClickListener.onClick()");
-        
-        // footerView must respond to user clicks.
-        // Must handle 3 cases:
-        // 1) The current location is new - download new Place Badge. Issue the
-        // following log call:
-        // log("Starting Place Download");
+        footerView.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
 
-        // 2) The current location has been seen before - issue Toast message.
-        // Issue the following log call:
-        // log("You already have this location badge");
-        
-        // 3) There is no current location - response is up to you. The best
-        // solution is to disable the footerView until you have a location.
-        // Issue the following log call:
-        // log("Location data is not available");
- 		
+				log("Entered footerView.OnClickListener.onClick()");
+				
+				// footerView must respond to user clicks.
+		        // Must handle 3 cases:
+		        // 1) The current location is new - download new Place Badge. Issue the
+		        // following log call:
+		        // log("Starting Place Download");
+				
+				
+				// 2) The current location has been seen before - issue Toast message.
+		        // Issue the following log call:
+		        // log("You already have this location badge");
+				
+				// 3) There is no current location - response is up to you. The best
+		        // solution is to disable the footerView until you have a location.
+		        // Issue the following log call:
+		        // log("Location data is not available");
+			}
+		});
+         		
 
 	}
 
@@ -86,7 +95,9 @@ public class PlaceViewActivity extends ListActivity implements LocationListener 
 
         // TODO - Check NETWORK_PROVIDER for an existing location reading.
         // Only keep this last reading if it is fresh - less than 5 minutes old.
-
+		if (){
+			
+		}
 	
 		
         // TODO - register to receive location updates from NETWORK_PROVIDER
