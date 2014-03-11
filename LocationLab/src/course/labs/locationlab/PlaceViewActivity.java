@@ -2,6 +2,7 @@ package course.labs.locationlab;
 
 import java.util.ArrayList;
 
+import course.labs.todomanager.R;
 import android.app.ListActivity;
 import android.content.Context;
 import android.location.Location;
@@ -15,6 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class PlaceViewActivity extends ListActivity implements LocationListener {
@@ -43,11 +45,14 @@ public class PlaceViewActivity extends ListActivity implements LocationListener 
         // TODO - Set up the app's user interface
         // This class is a ListActivity, so it has its own ListView
         // ListView's adapter should be a PlaceViewAdapter
-
+		mAdapter = new PlaceViewAdapter(getApplicationContext());
+		getListView().setFooterDividersEnabled(true);
+		
 		
         // TODO - add a footerView to the ListView
         // You can use footer_view.xml to define the footer
-
+		TextView footerView = (TextView) getLayoutInflater().inflate(R.layout.footer_view, null);
+		getListView().addFooterView(footerView);
 
 		
         // TODO - When the footerView's onClick() method is called, it must issue the
