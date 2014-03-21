@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import android.app.ListActivity;
 import android.app.LoaderManager;
 import android.app.LoaderManager.LoaderCallbacks;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Loader;
@@ -20,8 +21,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 import course.labs.contentproviderlab.provider.PlaceBadgesContract;
+import course.labs.locationlab.PlaceDownloaderTask;
+import course.labs.locationlab.PlaceViewActivity;
+import course.labs.locationlab.PlaceViewAdapter;
+import course.labs.locationlab.R;
 
 public class PlaceViewActivity extends ListActivity implements
 		LocationListener, LoaderCallbacks<Cursor> {
@@ -51,65 +57,114 @@ public class PlaceViewActivity extends ListActivity implements
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		// Acquire a reference to the system Location Manager
+		mLocationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
         // TODO - Set up the app's user interface
         // This class is a ListActivity, so it has its own ListView
- 
+		getListView().setFooterDividersEnabled(true);
 
         // TODO - add a footerView to the ListView
         // You can use footer_view.xml to define the footer
-
+		final TextView footerView = (TextView) getLayoutInflater().inflate(R.layout.footer_view, null);
+		getListView().addFooterView(footerView);
 
         // TODO - When the footerView's onClick() method is called, it must issue the
         // following log call
         // log("Entered footerView.OnClickListener.onClick()");
+		footerView.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+
+				log("Entered footerView.OnClickListener.onClick()");
+				
+				// footerView must respond to user clicks.
+		        // Must handle 3 cases:
+		        // 1) The current location is new - download new Place Badge. Issue the
+		        // following log call:
+		        // log("Starting Place Download");				
+				
+				// 2) The current location has been seen before - issue Toast message.
+		        // Issue the following log call:
+		        // log("You already have this location badge");
+								
+				// 3) There is no current location - response is up to you. The best
+		        // solution is to disable the footerView until you have a location.
+		        // Issue the following log call:
+		        // log("Location data is not available");
+				
+				if (mLastLocationReading == null){
+					
+					log("Location data is not available");
+														
+				}else if (mCursorAdapter.intersects(mLastLocationReading)){
+					
+					log("You already have this location badge");
+					Toast toast = Toast.makeText(getApplicationContext(), "You already have this location badge", Toast.LENGTH_SHORT);
+					toast.show();
+					
+				}else {
+					
+					new PlaceDownloaderTask(PlaceViewActivity.this).execute(mLastLocationReading);
+						
+					log("Starting Place Download");
+					Toast toast = Toast.makeText(getApplicationContext(), "Downloading new Place Badge", Toast.LENGTH_SHORT);
+					toast.show();
+					
+				}
+
+			}
+		});
         
-        // footerView must respond to user clicks.
-        // Must handle 3 cases:
-        // 1) The current location is new - download new Place Badge. Issue the
-        // following log call:
-        // log("Starting Place Download");
-
-        // 2) The current location has been seen before - issue Toast message.
-        // Issue the following log call:
-        // log("You already have this location badge");
-        
-        // 3) There is no current location - response is up to you. The best
-        // solution is to disable the footerView until you have a location.
-        // Issue the following log call:
-        // log("Location data is not available");
-
-
-		
 		
 		
 		// TODO - Create and set empty PlaceViewAdapter
         // ListView's adapter should be a PlaceViewAdapter called mCursorAdapter
-
+		mCursorAdapter = new PlaceViewAdapter(getApplicationContext(),null,0);
+		setListAdapter(mCursorAdapter);
 		
 		
 		
 		// TODO - Initialize a CursorLoader
-
+		getLoaderManager().initLoader(0, null, this);
         
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
+		
+		Location tmp = null;
+		
+		try {
 
-		mMockLocationProvider = new MockLocationProvider(
-				LocationManager.NETWORK_PROVIDER, this);
-
-		// TODO - Check NETWORK_PROVIDER for an existing location reading.
-		// Only keep this last reading if it is fresh - less than 5 minutes old.
-
+			mMockLocationProvider = new MockLocationProvider(
+					LocationManager.NETWORK_PROVIDER, this);
+	
+			// TODO - Check NETWORK_PROVIDER for an existing location reading.
+			// Only keep this last reading if it is fresh - less than 5 minutes old.
+			String locationProvider = LocationManager.NETWORK_PROVIDER;
+			
+			tmp = mLocationManager.getLastKnownLocation(locationProvider);
+			
+			
+			if (tmp != null && tmp.getTime() < FIVE_MINS ){
+			
+				mLastLocationReading = tmp;
+			
+			}
 
 		
 		
 		
-		// TODO - Register to receive location updates from NETWORK_PROVIDER
-
+			// TODO - Register to receive location updates from NETWORK_PROVIDER
+			mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, mMinTime, mMinDistance, this);
+			
+		}catch(NullPointerException e ){
+			tmp = mLastLocationReading;
+		}
 		
 		
 		
@@ -117,14 +172,20 @@ public class PlaceViewActivity extends ListActivity implements
 
 	@Override
 	protected void onPause() {
-
-		mMockLocationProvider.shutdown();
-
-		// TODO - Unregister for location updates
-
-		
-		
 		super.onPause();
+		
+		try{
+
+			mMockLocationProvider.shutdown();
+	
+			// TODO - unregister for location updates
+			mLocationManager.removeUpdates(this);
+	
+		
+		}catch(NullPointerException e ){
+			Toast toast = Toast.makeText(getApplicationContext(), "Error unregistering provider", Toast.LENGTH_SHORT);
+			toast.show();
+		}
 	}
 
 	public void addNewPlace(PlaceRecord place) {
@@ -145,10 +206,11 @@ public class PlaceViewActivity extends ListActivity implements
 		// the current location
 		// 3) If the current location is newer than the last locations, keep the
 		// current location.
-
-
-	
-	
+		if (currentLocation != null || age(currentLocation) < age(mLastLocationReading) ){
+			
+			mLastLocationReading = currentLocation;
+			
+		}	
 	
 	}
 
@@ -170,17 +232,19 @@ public class PlaceViewActivity extends ListActivity implements
 	@Override
 	public Loader<Cursor> onCreateLoader(int arg0, Bundle arg1) {
 		log("Entered onCreateLoader()");
+		
+		String sortOrder = PlaceBadgesContract._ID + " ASC";
+				
 
 		// TODO - Create a new CursorLoader and return it
-		
-        
-        return null;
+		return new CursorLoader(this, PlaceBadgesContract.CONTENT_URI, null, null, null, sortOrder);
 	}
 
 	@Override
 	public void onLoadFinished(Loader<Cursor> newLoader, Cursor newCursor) {
 
 		// TODO - Swap in the newCursor
+		mCursorAdapter.swapCursor(newCursor);
 
 	
     }
@@ -189,6 +253,7 @@ public class PlaceViewActivity extends ListActivity implements
 	public void onLoaderReset(Loader<Cursor> newLoader) {
 
 		// TODO - Swap in a null Cursor
+		mCursorAdapter.swapCursor(null);
 
 	
     }

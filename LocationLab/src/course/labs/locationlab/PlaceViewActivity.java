@@ -42,6 +42,10 @@ public class PlaceViewActivity extends ListActivity implements LocationListener 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		// Acquire a reference to the system Location Manager
+		mLocationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+
 
         // TODO - Set up the app's user interface
         // This class is a ListActivity, so it has its own ListView
@@ -84,33 +88,27 @@ public class PlaceViewActivity extends ListActivity implements LocationListener 
 				if (mLastLocationReading == null){
 					
 					log("Location data is not available");
-					
-					while (mLastLocationReading == null){
-						footerView.setClickable(false);
-						footerView.setVisibility(ListView.INVISIBLE);
-					}
-					return;
-					
-				}
-				
-				if (mAdapter.intersects(mLastLocationReading)){
+														
+				}else if (mAdapter.intersects(mLastLocationReading)){
 					
 					log("You already have this location badge");
 					Toast toast = Toast.makeText(getApplicationContext(), "You already have this location badge", Toast.LENGTH_SHORT);
 					toast.show();
-					return;
-				}
-				
-				new PlaceDownloaderTask(PlaceViewActivity.this).execute(mLastLocationReading);
 					
-				log("Starting Place Download");
-				Toast toast = Toast.makeText(getApplicationContext(), "Downloading new Place Badge", Toast.LENGTH_SHORT);
-				toast.show();
+				}else {
+					
+					new PlaceDownloaderTask(PlaceViewActivity.this).execute(mLastLocationReading);
+						
+					log("Starting Place Download");
+					Toast toast = Toast.makeText(getApplicationContext(), "Downloading new Place Badge", Toast.LENGTH_SHORT);
+					toast.show();
+					
+				}
 
 			}
 		});
         
-        //setListAdapter(mAdapter);
+        setListAdapter(mAdapter);
          		
 
 	}
@@ -118,37 +116,50 @@ public class PlaceViewActivity extends ListActivity implements LocationListener 
 	@Override
 	protected void onResume() {
 		super.onResume();
-
-		mMockLocationProvider = new MockLocationProvider(
-				LocationManager.NETWORK_PROVIDER, this);
-
-        // TODO - Check NETWORK_PROVIDER for an existing location reading.
-        // Only keep this last reading if it is fresh - less than 5 minutes old.
-		String locationProvider = LocationManager.NETWORK_PROVIDER;
-
-		Location tmp = mLocationManager.getLastKnownLocation(locationProvider);
+		
+		Location tmp = null;
+		
+		try {
+			
+			mMockLocationProvider = new MockLocationProvider(
+					LocationManager.NETWORK_PROVIDER, this);
 	
-		if (tmp != null && tmp.getTime() < FIVE_MINS ){
+	        // TODO - Check NETWORK_PROVIDER for an existing location reading.
+	        // Only keep this last reading if it is fresh - less than 5 minutes old.
+			String locationProvider = LocationManager.NETWORK_PROVIDER;
 			
-			mLastLocationReading = tmp;
+			tmp = mLocationManager.getLastKnownLocation(locationProvider);
 			
+			
+			if (tmp != null && tmp.getTime() < FIVE_MINS ){
+			
+				mLastLocationReading = tmp;
+			
+			}
+		
+			// TODO - register to receive location updates from NETWORK_PROVIDER
+			mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, mMinTime, mMinDistance, this);
+		
+		}catch(NullPointerException e ){
+			tmp = mLastLocationReading;
 		}
-		
-		// TODO - register to receive location updates from NETWORK_PROVIDER
-		mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, mMinTime, mMinDistance, this);
-		
 	}
 
 	@Override
 	protected void onPause() {
-
-		mMockLocationProvider.shutdown();
-
-		// TODO - unregister for location updates
-		mLocationManager.removeUpdates(this);
-
-		
 		super.onPause();
+		try{
+
+			mMockLocationProvider.shutdown();
+	
+			// TODO - unregister for location updates
+			mLocationManager.removeUpdates(this);
+	
+		
+		}catch(NullPointerException e ){
+			Toast toast = Toast.makeText(getApplicationContext(), "Error unregistering provider", Toast.LENGTH_SHORT);
+			toast.show();
+		}
 	}
 
 	// Callback method used by PlaceDownloaderTask
