@@ -20,11 +20,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 import course.labs.contentproviderlab.provider.PlaceBadgesContract;
-import course.labs.locationlab.PlaceViewAdapter;
-import course.labs.locationlab.R;
 
 public class PlaceViewActivity extends ListActivity implements
 		LocationListener, LoaderCallbacks<Cursor> {
@@ -57,13 +54,11 @@ public class PlaceViewActivity extends ListActivity implements
 
         // TODO - Set up the app's user interface
         // This class is a ListActivity, so it has its own ListView
-		mAdapter = new PlaceViewAdapter(getApplicationContext());
-		getListView().setFooterDividersEnabled(true);
+ 
 
         // TODO - add a footerView to the ListView
         // You can use footer_view.xml to define the footer
-		final TextView footerView = (TextView) getLayoutInflater().inflate(R.layout.footer_view, null);
-		getListView().addFooterView(footerView);
+
 
         // TODO - When the footerView's onClick() method is called, it must issue the
         // following log call
