@@ -11,6 +11,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.CursorIndexOutOfBoundsException;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
@@ -67,17 +68,20 @@ public class PlaceViewAdapter extends CursorAdapter {
 
 		if (null != newCursor) {
 
-        // TODO - clear the ArrayList list so it contains
-		// the current set of PlaceRecords. Use the 
-		// getPlaceRecordFromCursor() method to add the
-		// current place to the list
-		list.clear();
-		list.add(getPlaceRecordFromCursor(newCursor));
-
-            
-            
-            
-            
+	        // TODO - clear the ArrayList list so it contains
+			// the current set of PlaceRecords. Use the 
+			// getPlaceRecordFromCursor() method to add the
+			// current place to the list
+			try {
+				list.clear();
+				if (newCursor.moveToFirst()) {
+					do {
+					   list.add(getPlaceRecordFromCursor(newCursor));
+					} while (newCursor.moveToNext() == true);
+				}
+			}catch(CursorIndexOutOfBoundsException e){
+				return null;
+			}
             
             // Set the NotificationURI for the new cursor
 			newCursor.setNotificationUri(mContext.getContentResolver(),
@@ -157,6 +161,7 @@ public class PlaceViewAdapter extends CursorAdapter {
 			mContentValues.put(PlaceBadgesContract.LON, listItem.getLon());
 			
 			mContext.getContentResolver().insert(PlaceBadgesContract.CONTENT_URI, mContentValues);
+			mContext.getContentResolver().notifyChange(PlaceBadgesContract.CONTENT_URI, null);
 			        
         
         }
@@ -172,10 +177,8 @@ public class PlaceViewAdapter extends CursorAdapter {
 		list.clear();
 
 		// TODO - delete all records in the ContentProvider
-
-
-        
-        
+		mContext.getContentResolver().delete(PlaceBadgesContract.CONTENT_URI, null, null);
+		mContext.getContentResolver().notifyChange(PlaceBadgesContract.CONTENT_URI, null);        
         
 	}
 

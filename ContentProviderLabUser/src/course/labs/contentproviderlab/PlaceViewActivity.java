@@ -24,10 +24,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import course.labs.contentproviderlab.provider.PlaceBadgesContract;
-import course.labs.locationlab.PlaceDownloaderTask;
-import course.labs.locationlab.PlaceViewActivity;
-import course.labs.locationlab.PlaceViewAdapter;
-import course.labs.locationlab.R;
 
 public class PlaceViewActivity extends ListActivity implements
 		LocationListener, LoaderCallbacks<Cursor> {
@@ -53,7 +49,7 @@ public class PlaceViewActivity extends ListActivity implements
 
 	// A fake location provider used for testing
 	private MockLocationProvider mMockLocationProvider;
-
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -118,11 +114,15 @@ public class PlaceViewActivity extends ListActivity implements
 			}
 		});
         
-		
-		
 		// TODO - Create and set empty PlaceViewAdapter
         // ListView's adapter should be a PlaceViewAdapter called mCursorAdapter
-		mCursorAdapter = new PlaceViewAdapter(getApplicationContext(),null,0);
+		Cursor cursor = null;
+		try {
+			cursor = getContentResolver().query(PlaceBadgesContract.CONTENT_URI,null,null,null, null);
+		}catch (NullPointerException e){
+			cursor = null;
+		}
+		mCursorAdapter = new PlaceViewAdapter(this,cursor,0);
 		setListAdapter(mCursorAdapter);
 		
 		
@@ -154,10 +154,7 @@ public class PlaceViewActivity extends ListActivity implements
 			
 				mLastLocationReading = tmp;
 			
-			}
-
-		
-		
+			}		
 		
 			// TODO - Register to receive location updates from NETWORK_PROVIDER
 			mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, mMinTime, mMinDistance, this);
