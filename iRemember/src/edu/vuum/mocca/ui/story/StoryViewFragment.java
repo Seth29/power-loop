@@ -246,8 +246,7 @@ public class StoryViewFragment extends Fragment {
 
 			// Set up video playback using the MediaController android widget
 			// and the video view already set up in the layout file.
-			getActivity().setContentView(videoLinkView);
-			
+						
 			// TODO - Create a new MediaController for this activity 
 			MediaController mediaController = new MediaController(getActivity());
 			

@@ -337,7 +337,7 @@ public class CreateStoryFragment extends Fragment {
 			if (resultCode == CreateStoryActivity.RESULT_OK) {
 				// Image captured and saved to fileUri specified in the Intent
 				// fileUriFinal = fileUri;
-				audioPath = (String) data.getExtras().get("data");
+				audioPath = data.getData().getPath();
 				audioLocation.setText("file://" + audioPath.toString());
 			} else if (resultCode == CreateStoryActivity.RESULT_CANCELED) {
 				// User cancelled the image capture
