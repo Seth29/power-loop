@@ -232,16 +232,16 @@ public class CreateStoryActivity extends StoryActivityBase {
 	private void launchSoundIntent() {
 		
 		// TODO - Create a new intent to launch the SoundRecordActivity activity
-		Intent audioIntent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
+		Intent audioIntent = new Intent(this, SoundRecordActivity.class);
 		
 		// TODO - Use getOutputMediaFile() to create a new 
 		// filename for this specific sound file
-		Uri soundFile = getOutputMediaFileUri(MEDIA_TYPE_AUDIO);
+		File soundFile = getOutputMediaFile(MEDIA_TYPE_AUDIO);
 		//fragment.audioPath = soundFile.getPath();
 		
 		// TODO - Add the filename to the Intent as an extra. Use the Intent-extra name
 		// from the SoundRecordActivity class, EXTRA_OUTPUT
-		audioIntent.putExtra(SoundRecordActivity.EXTRA_OUTPUT, soundFile);
+		audioIntent.putExtra(SoundRecordActivity.EXTRA_OUTPUT, soundFile.getPath());
 				
 		// TODO - Start a new activity for result, using the new intent and the request
 		// code MIC_SOUND_REQUEST
